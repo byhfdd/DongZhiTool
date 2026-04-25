@@ -1,149 +1,229 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校园跑剩余次数计算器</title>
+    <title>校园跑自然周计算器</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; display: flex; justify-content: center; padding: 20px; color: #333; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
-        h2 { text-align: center; color: #2c3e50; margin-top: 0; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="date"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .result-box { background: #e8f4fd; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px; border: 1px solid #bde0f5; }
-        .big-number { font-size: 36px; font-weight: bold; color: #007bff; display: block; margin: 10px 0; }
-        .note { font-size: 12px; color: #666; margin-top: 10px; line-height: 1.5; background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeeba; }
-        .btn { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: #0056b3; }
-        .week-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-        .week-item:last-child { border-bottom: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .result-box {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            border: 1px solid #bde0f5;
+        }
+
+        .big-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .breakdown {
+            text-align: left;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+            border-top: 1px solid #bde0f5;
+            padding-top: 10px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .warning {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>🏃 校园跑计算器</h2>
-    
-    <div class="input-group">
-        <label>截止日期</label>
-        <input type="date" id="endDate" value="2026-06-19">
+    <div class="container">
+        <h2>🏃 校园跑计算器</h2>
+
+        <div class="input-group">
+            <label>截止日期</label>
+            <input type="date" id="endDate" value="2026-06-19">
+        </div>
+
+        <div class="input-group">
+            <label>每周限跑次数</label>
+            <input type="number" id="weeklyLimit" value="5">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #555;">本周情况（本周已跑）</p>
+
+        <div class="input-group">
+            <label>本周（周日至周六）已跑次数？</label>
+            <input type="number" id="currentWeekDone" value="0" min="0">
+            <div id="weekLimitWarning" class="warning">输入次数超过了每周上限！</div>
+        </div>
+
+        <button class="btn" onclick="calculateRuns()">计算还能跑几次</button>
+
+        <div id="resultArea" class="result-box" style="display:none;">
+            <span>直到截止日，还能跑</span>
+            <span class="big-number" id="remainingCount">0</span>
+            <span>次</span>
+
+            <div class="breakdown">
+                <div class="item">
+                    <span>本周剩余:</span>
+                    <span id="currentWeekAble">0 次</span>
+                </div>
+                <div class="item">
+                    <span>未来完整周数:</span>
+                    <span id="futureWeeksText">0 周</span>
+                </div>
+                <div class="item">
+                    <span>未来还能跑:</span>
+                    <span id="futureRunsText">0 次</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="input-group">
-        <label>每周限跑次数</label>
-        <input type="number" id="weeklyLimit" value="5">
-    </div>
+    <script>
+        function calculateRuns() {
+            const endDateInput = document.getElementById('endDate').value;
+            const weeklyLimit = parseInt(document.getElementById('weeklyLimit').value);
+            const currentWeekDone = parseInt(document.getElementById('currentWeekDone').value) || 0;
+            const warningEl = document.getElementById('weekLimitWarning');
 
-    <div class="input-group">
-        <label>本周(当前周)已跑次数 (可选)</label>
-        <input type="number" id="currentWeekDone" value="0" min="0">
-        <small style="color:#888">如果不清楚或不想算，保持为0即可</small>
-    </div>
-
-    <button class="btn" onclick="calculateRuns()">计算剩余次数</button>
-
-    <div id="resultArea" class="result-box" style="display:none;">
-        <span>从下周起，还能跑</span>
-        <span class="big-number" id="remainingCount">0</span>
-        <span>次</span>
-        <div id="weekDetails" style="text-align: left; margin-top: 15px; max-height: 150px; overflow-y: auto;"></div>
-    </div>
-
-    <div class="note">
-        <strong>计算逻辑说明：</strong><br>
-        由于无法获取历史数据，本工具默认从<strong>下周一</strong>开始计算剩余周数。本周的次数作为“额外”计算（如果你填写了的话）。
-    </div>
-</div>
-
-<script>
-    function getMonday(d) {
-        d = new Date(d);
-        var day = d.getDay(),
-            diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
-        return new Date(d.setDate(diff));
-    }
-
-    function addDays(date, days) {
-        var result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
-    }
-
-    function calculateRuns() {
-        const endDateInput = document.getElementById('endDate').value;
-        const weeklyLimit = parseInt(document.getElementById('weeklyLimit').value);
-        const currentWeekDone = parseInt(document.getElementById('currentWeekDone').value) || 0;
-
-        if (!endDateInput) {
-            alert("请选择截止日期");
-            return;
-        }
-
-        const today = new Date();
-        const endDate = new Date(endDateInput);
-        
-        // 获取本周一
-        const thisMonday = getMonday(today);
-        // 获取下周一
-        const nextMonday = addDays(thisMonday, 7);
-
-        let totalRemaining = 0;
-        let weekHtml = '';
-        
-        // 逻辑：从下周一开始遍历，直到截止日期
-        let loopDate = new Date(nextMonday);
-        
-        // 如果截止日期比下周一还早，说明只剩本周了
-        if (endDate < nextMonday) {
-             document.getElementById('resultArea').style.display = 'block';
-             document.getElementById('remainingCount').innerText = 0;
-             document.getElementById('weekDetails').innerHTML = '<p>截止日期已过或仅剩本周，请手动管理。</p>';
-             return;
-        }
-
-        let weekCount = 1;
-
-        while (loopDate <= endDate) {
-            // 这一周是完整的吗？
-            // 计算这一周的周日
-            let thisWeekSunday = addDays(loopDate, 6);
-            
-            // 如果截止日期在这一周中间
-            if (thisWeekSunday > endDate) {
-                thisWeekSunday = endDate;
+            if (!endDateInput) {
+                alert("请选择截止日期");
+                return;
             }
 
-            // 计算这一周有多少天可用（简单估算，假设用户每天都可能跑）
-            // 但规则是“每周5次”，我们假设每周都能跑满5次
-            // 除非是最后一周，如果最后一周天数很少，可能跑不满5次，但通常为了保险起见，我们按周算
-            
-            totalRemaining += weeklyLimit;
-            
-            // 格式化日期显示
-            let startStr = (loopDate.getMonth() + 1) + '/' + loopDate.getDate();
-            let endStr = (thisWeekSunday.getMonth() + 1) + '/' + thisWeekSunday.getDate();
-            
-            weekHtml += `
-                <div class="week-item">
-                    <span>第 ${weekCount} 周 (${startStr} - ${endStr})</span>
-                    <span><strong>${weeklyLimit} 次</strong></span>
-                </div>
-            `;
+            const today = new Date();
+            const endDate = new Date(endDateInput);
 
-            // 进入下一周
-            loopDate = addDays(loopDate, 7);
-            weekCount++;
+            // 检查输入是否合法
+            if (currentWeekDone > weeklyLimit) {
+                warningEl.style.display = 'block';
+                warningEl.innerText = `每周最多只能跑 ${weeklyLimit} 次！`;
+                // 即使报错也继续计算，但本周剩余为0
+            } else {
+                warningEl.style.display = 'none';
+            }
+
+            // 1. 计算本周（自然周）剩余
+            let runsLeftInCurrentWeek = weeklyLimit - currentWeekDone;
+            if (runsLeftInCurrentWeek < 0) runsLeftInCurrentWeek = 0; // 不能是负数
+
+            // 2. 计算未来周数
+            // 获取今天的星期几 (0=周日, 1=周一, ... 6=周六)
+            let todayDayOfWeek = today.getDay();
+            // 计算今天到本周末（周六）还有几天
+            let daysToThisWeekEnd = 6 - todayDayOfWeek;
+            // 计算下周一的日期
+            let nextMonday = new Date(today);
+            nextMonday.setDate(today.getDate() + (7 - todayDayOfWeek));
+
+            // 计算从下周一开始，到截止日期的天数
+            let daysFromNextMonday = Math.ceil((endDate - nextMonday) / (1000 * 60 * 60 * 24)) + 1; // +1 包含截止日当天
+
+            if (daysFromNextMonday <= 0) {
+                // 如果截止日期在下周一开始之前，则未来周数为0
+                daysFromNextMonday = 0;
+            }
+
+            // 计算未来有多少个完整的周
+            let futureFullWeeks = Math.floor(daysFromNextMonday / 7);
+            // 计算未来剩余的天数（不足一周）
+            let extraDays = daysFromNextMonday % 7;
+            // 这些额外的天数也算作一个“周”（因为规则是每周5次，即使只有1天，也可能有1次的额度）
+            let extraWeeks = extraDays > 0 ? 1 : 0;
+
+            let totalFutureWeeks = futureFullWeeks + extraWeeks;
+            let runsFromFutureWeeks = totalFutureWeeks * weeklyLimit;
+
+            // 3. 总计
+            let totalRemaining = runsLeftInCurrentWeek + runsFromFutureWeeks;
+
+            // 显示结果
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('remainingCount').innerText = totalRemaining;
+
+            document.getElementById('currentWeekAble').innerText = runsLeftInCurrentWeek + " 次";
+            document.getElementById('futureWeeksText').innerText = totalFutureWeeks + " 周";
+            document.getElementById('futureRunsText').innerText = runsFromFutureWeeks + " 次";
         }
-
-        // 加上本周已经跑的（作为补充信息，不计入“未来”次数，但计入总数）
-        // 这里我们只展示“未来”还能跑多少次，不包含本周已跑的，避免混淆
-        
-        document.getElementById('resultArea').style.display = 'block';
-        document.getElementById('remainingCount').innerText = totalRemaining;
-        document.getElementById('weekDetails').innerHTML = weekHtml;
-    }
-</script>
+    </script>
 
 </body>
+
 </html>
